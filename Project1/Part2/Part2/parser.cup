@@ -1,0 +1,81 @@
+/* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
+/**
+ *  Package and Import Specifications
+ */
+import java_cup.runtime.*;
+
+/**
+ *  Usercode Components
+ */
+parser code {:
+    // Connect this parser to a scanner!
+    Scanner s;
+    Parser(Scanner s){ this.s=s; }
+:}
+
+/* define how to connect to the scanner! */
+scan with {: return s.next_token(); :};
+
+/**
+ *  Symbol Lists
+ */
+
+/* Terminals (tokens returned by the scanner). */
+terminal            PLUS, LBRACKET, RBRACKET, LPAREN, RPAREN, COMMA, IF, ELSE, PREFIX, REVERSE;
+terminal String     STRING_LITERAL, IDENTIFIER;       
+
+/*  Non terminals */
+non terminal          Prog, Defs, Def, Calls, Call, Arglist1, Body, Condition, IfBody;
+
+/**
+ *  The Grammar Rules
+ */
+Prog ::=            Defs:defs Calls:calls                                                  {: System.out.println("public class Main{\n\n\tpublic static void main(String[] args){\n"+ calls  + "" + "\n\t}" + defs + "\n}"); :};
+
+Defs ::=            Defs:defs Def:def                                                      {: RESULT = def + "" + defs; :}
+                    |                                                                      {: RESULT = " "; :} ;
+
+//3
+Def ::=             IDENTIFIER:id LPAREN RPAREN LBRACKET Body:e2 RBRACKET                  {: RESULT = "\n\t public static String "  + id + "()" + "{\n\t\treturn " + e2 + ";\n\t}\n"; :} 
+                    |IDENTIFIER:id LPAREN Arglist1:e1 RPAREN LBRACKET Body:e2 RBRACKET     {: RESULT = "\n\t public static String " + id + "(" +e1 + ")" + "{\n\t\treturn " + e2 + ";\n\t}\n"; :};
+
+Calls ::=           Call:call Calls:calls                                                  {: RESULT = "\n\t\t System.out.println( " + call + ");" + calls; :}
+                    |                                                                      {: RESULT = " "; :} ;
+
+Call ::=            IDENTIFIER:id LPAREN Arglist1:e1 RPAREN                                {: RESULT = id + "(" + e1 + ")"; :} 
+                    |IDENTIFIER:id LPAREN RPAREN                                           {: RESULT = id + "()"; :};
+
+Arglist1 ::=        Body:e1 COMMA Arglist1:e2                                              {: RESULT =  e1 + "," + e2; :}
+                    |Body:e1                                                               {: RESULT = e1; :};
+
+Body ::=           STRING_LITERAL:e1 PLUS Body:e2                                          {: RESULT = "\" "+ e1 + "\" " + "+" + e2; :}
+                    |Call:e1 PLUS Body:e2                                                  {: RESULT = e1 + "+"  + e2; :}
+                    |STRING_LITERAL:e1                                                     {: RESULT = "\" " + e1 + "\""; :}
+                    |Call:e1                                                               {: RESULT = e1; :}
+                    |IDENTIFIER:e1 PLUS Body:e2                                            {: RESULT = e1 + "+" + e2; :}
+                    |LPAREN IfBody:e1 RPAREN PLUS Body:e2                                  {: RESULT = "(" + e1 + ") +" + e2; :}
+                    |IDENTIFIER:e1                                                         {: RESULT = e1; :}
+                    |IfBody:e1                                                             {: RESULT = e1; :};
+
+IfBody ::=         IF LPAREN Condition:cond RPAREN Body:e1 ELSE Body:e2                     {: RESULT =  cond + "?" + e1 + ":" + e2 ; :};
+
+
+Condition ::=       IDENTIFIER:e1 PREFIX STRING_LITERAL:e2                                  {: RESULT = e1 + "StartsWith(" + e2 + ")"; :}
+                    |STRING_LITERAL:e1 PREFIX IDENTIFIER:e2                                 {: RESULT = e1 + "StartsWith(" + e2 + ")"; :}
+                    |REVERSE STRING_LITERAL:e1                                              {: RESULT = "reverse(" + e1 + ")"; :}
+                    |REVERSE IDENTIFIER:e1                                                  {: RESULT = "reverse(" + e1 + ")"; :}
+                    |REVERSE STRING_LITERAL:e1 Condition:c1                                 {: RESULT = "reverse(" + e1 + ")" + c1; :}
+                    |REVERSE IDENTIFIER:e1  Condition:c1                                    {: RESULT = "reverse(" + e1 + ")" + c1; :}
+                    |PREFIX STRING_LITERAL:e2                                               {: RESULT = "StartsWith(" + e2 + ")"; :}
+                    |PREFIX IDENTIFIER:e2                                                   {: RESULT = "StartsWith(" + e2 + ")"; :}
+                    |PREFIX REVERSE STRING_LITERAL:e2                                       {: RESULT = "StartsWith(reverse(" + e2 + "))"; :}
+                    |PREFIX REVERSE IDENTIFIER:e2                                           {: RESULT = "StartsWith(reverse(" + e2 + "))"; :}
+                    |STRING_LITERAL:e1 PREFIX STRING_LITERAL:e2                             {: RESULT = e1 + "StartsWith(" + e2 + ")"; :};
+
+
+
+
+
+
+
+

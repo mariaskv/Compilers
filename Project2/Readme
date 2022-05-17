@@ -1,0 +1,22 @@
+Maria Skevofylaka - 1115201900173
+
+Compilers - Fall 2021-2022
+
+Project 2:
+
+Compilation:
+make compile : Compiles all the files of the project
+
+Execution: java Main <filename>
+
+About the Code:
+
+This Project was about implementing a simple compiler for MiniJava.
+
+In order to achive this, I created two Visitor Classes(Visitor1, Visitor 2) which work as follow:
+
+The first visitor crosses the entire programm and stores in a SymbolTable all the data it gets.(eg. classes and their methods/fields and for each method their fields and parametrs) without doing any checking.
+
+The second visitor based on the Symbol Table created by the first one does the type checking. Eg. For every method checks that it returns the same type as it has been declared, that an assignment is a legal one etc. 
+
+At the end of the parsing the offsets of every field and method must be printed. In order to do so a class GlobalVars has been created which works as a global counter that saves the current offset of fields and methods and increases it every time before an offset is printed.
