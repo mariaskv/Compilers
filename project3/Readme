@@ -1,0 +1,20 @@
+Maria Skevofylaka - 1115201900173
+
+Compilers - Fall 2021-2022
+
+Project 3:
+
+Compilation:
+make compile : Compiles all the files of the project
+
+Execution: java Main <filename>
+
+    Creates a file with name: filename.ll
+    Executes as: clang filename.ll a.out
+                ./a.out
+
+About the Code:
+
+This Project was about implementing a compiler for MiniJava to LLVM code.
+
+For this reason we implemented a third visitor with name: Visitor3 which crosses the file and turns the java code into llvm code. It uses the SymbolTable created from the first Visitor. 
